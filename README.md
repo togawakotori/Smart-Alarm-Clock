@@ -26,3 +26,6 @@ sudo apt-get install libttspico-utils
 pico2wave -w lookdave.wav "Look Dave, I can see you're really upset about this." 
 
 aplay lookdave.wav
+
+-----
+http://www.angusfan.com/2017/03/16/Raspberry/
