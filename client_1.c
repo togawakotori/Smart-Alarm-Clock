@@ -48,10 +48,7 @@ int main(int argc, char *argv[])
 		char buf[BUFFER_SIZE];
 		int inputLen=0;
 		
-		/*printf("please enter year,month,date(seperated by -)：\n");
-		scanf("%d-%d-%d",&buf[0],&buf[1],&buf[2]);
-		printf("please enter hour,minute,second in 24 hours(seperated by :)：\n");
-		scanf("%d:%d:%d",&buf[3],&buf[4],&buf[5]);*/
+		printf("please enter time in the following format:\nyyyy-MM-dd HH:mm:ss");
 		
 		while((buf[inputLen++]=getchar())!='\n')
 		{
