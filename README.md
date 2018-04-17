@@ -16,6 +16,7 @@
 Then write a text.txt
 
   espeak --stdout -s 80 text.txt > text.wav
+  
   aplay text.wav
   
 ------
