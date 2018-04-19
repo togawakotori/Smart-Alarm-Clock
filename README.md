@@ -32,7 +32,17 @@ aplay lookdave.wav
 **3rd Solution to text2audio**
 
 ttl_sample.c
+-----
+
+client_weather.c	Add files via upload	22 hours ago
+demo.tar.gz	Add files via upload	22 hours ago
+joystick_PS2.c	Add files via upload	a day ago
+server_buzzer_joystick.c	Add files via upload	22 hours ago
+tts_make.sh	tts_sample makefile and run	a day ago
+tts_run.c	run tts_make.sh	a day ago
+tts_sample.c	Add files via upload	2 days ago
 
 -----
+# LINK
 http://www.angusfan.com/2017/03/16/Raspberry/
 http://www.xfyun.cn/services/online_tts
