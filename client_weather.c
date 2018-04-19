@@ -10,6 +10,8 @@
 #include <arpa/inet.h> 
 #include <wiringPi.h>
 #include <stdint.h>
+#include <pcf8591.h>
+#include <math.h>
 
 #define BUFFER_SIZE 1024
 
@@ -17,9 +19,13 @@
 
 #define DHTPIN 0
 
-int dht11_dat[5] = {0,0,0,0,0};
+#define		PCF     120   
+#define		DOpin	1
 
-void read_dht11_dat()
+int dht11_dat[5] = {0,0,0,0,0};
+uint8_t rain=6;
+
+int read_dht11_dat()
 {
 	uint8_t laststate = HIGH;
 	uint8_t counter = 0;
@@ -69,17 +75,58 @@ void read_dht11_dat()
 		f = dht11_dat[2] * 9. / 5. + 32;
 		printf("Humidity = %d.%d %% Temperature = %d.%d *C (%.1f *F)\n", 
 				dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3], f);
+				return 0;
 	}
 	else
 	{
 		printf("Data not good, skip\n");
+		return 1;
 	}
 }
 
+void read_rain_status()
+{
+	int analogVal;
+	//int status;
+	pinMode(DOpin, OUTPUT);
+	digitalWrite(DOpin, LOW);
+	delay(18);
+	// then pull it up for 40 microseconds
+	digitalWrite(DOpin, HIGH);
+	delayMicroseconds(40); 
+	// prepare to read the pin
+	pinMode(DOpin, INPUT);
+	//if(wiringPiSetup() == -1){
+	//	printf("setup wiringPi failed !");
+		//return 1;
+	//}
+	// Setup pcf8591 on base pin 120, and address 0x48
+	//pcf8591Setup(PCF, 0x48);
+
+	//pinMode(DOpin, INPUT);
+
+	//status = 0;
+	// loop forever
+	analogVal = analogRead(PCF + 1);
+	
+
+	rain = digitalRead(DOpin);
+	 
+	 //printf("%d %d\n", analogVal,rain);
+/*
+		if (rain != status)
+		{
+			//Print(tmp);
+			status = rain;
+			//printf("status  = %d\n", rain);
+		}
+*/
+}
 
 int main(int argc, char *argv[])
 {
     int sockfd = 0, n = 0;
+    int temp;
     char recvBuff[1024];
     struct sockaddr_in serv_addr; 
 
@@ -91,11 +138,18 @@ int main(int argc, char *argv[])
         printf("\n Usage: %s <ip of server> \n",argv[0]);
         return 1;
     }
+    
     if (wiringPiSetup () == -1)
 	exit (1) ; 
 	
+			
+	// Setup pcf8591 on base pin 120, and address 0x48
+	pcf8591Setup(PCF, 0x48);
+
+	
+	
 	while (1){
-		memset(recvBuff, '0',sizeof(recvBuff));
+		//memset(recvBuff, '0',sizeof(recvBuff));
 		if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 		{
 		    printf("\n Error : Could not create socket \n");
@@ -113,8 +167,8 @@ int main(int argc, char *argv[])
 		    return 1;
 		} 
 
-		char buf[BUFFER_SIZE];
-		int inputLen=0;
+		//char buf[BUFFER_SIZE];
+		//int inputLen=0;
 		
 		//printf("please enter time in the following format:\nyyyy-MM-dd HH:mm:ss\n");
 		/*
@@ -123,9 +177,13 @@ int main(int argc, char *argv[])
 		}
 		buf[inputLen++] = 0;
 	*/
-		read_dht11_dat();
+		temp = read_dht11_dat();
+		read_rain_status();
 		delay(1000);
 		//buf = dht11_dat;
+	//	pinMode(DOpin, INPUT);
+		
+	 //	delay(1000);
 	 
 	    if( connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
 		{
@@ -135,14 +193,16 @@ int main(int argc, char *argv[])
 
         //printf("Yes");
         	int k;
-	       int buff[6];
+	       int buff[7];
 	       buff[0] = 1;
 	       for (k = 1; k < 6; k++){
 	             buff[k] = dht11_dat[k-1];
 	       }
+	       buff[6] = rain;
 	       
-		printf("%d.%d %d.%d\n", dht11_dat[0],dht11_dat[1],dht11_dat[2],dht11_dat[3]);
-		send(sockfd, buff, sizeof(buff), 0);
+		printf("%d %d %d %d %d %d %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5] ,buff[6]);
+		//if (temp == 0)
+			send(sockfd, buff, sizeof(buff), 0);
 		
 		/*while ((n = read(sockfd, recvBuff, sizeof(recvBuff)-1))>0){
 			recvBuff[n] = 0;
