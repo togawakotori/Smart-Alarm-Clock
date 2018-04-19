@@ -24,6 +24,7 @@
 
 int dht11_dat[5] = {0,0,0,0,0};
 uint8_t rain=6;
+time_t sys;
 
 int read_dht11_dat()
 {
@@ -73,13 +74,13 @@ int read_dht11_dat()
 	if ((j >= 40) && 
 			(dht11_dat[4] == ((dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF)) ) {
 		f = dht11_dat[2] * 9. / 5. + 32;
-		printf("Humidity = %d.%d %% Temperature = %d.%d *C (%.1f *F)\n", 
-				dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3], f);
+		//printf("Humidity = %d.%d %% Temperature = %d.%d *C (%.1f *F)\n", 
+		//		dht11_dat[0], dht11_dat[1], dht11_dat[2], dht11_dat[3], f);
 				return 0;
 	}
 	else
 	{
-		printf("Data not good, skip\n");
+		//printf("Data not good, skip\n");
 		return 1;
 	}
 }
@@ -177,7 +178,12 @@ int main(int argc, char *argv[])
 		}
 		buf[inputLen++] = 0;
 	*/
+		
 		temp = read_dht11_dat();
+		while (temp == 1){
+			temp = read_dht11_dat();
+			delay(1000);
+		}
 		read_rain_status();
 		delay(1000);
 		//buf = dht11_dat;
@@ -193,15 +199,17 @@ int main(int argc, char *argv[])
 
         //printf("Yes");
         	int k;
-	       int buff[7];
+	       long int buff[8];
+	       sys = time(NULL);
 	       buff[0] = 1;
-	       for (k = 1; k < 6; k++){
-	             buff[k] = dht11_dat[k-1];
+	       buff[1] = sys;
+	       for (k = 2; k < 7; k++){
+	             buff[k] = dht11_dat[k-2];
 	       }
-	       buff[6] = rain;
+	       buff[7] = rain;
 	       
-		printf("%d %d %d %d %d %d %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5] ,buff[6]);
-		//if (temp == 0)
+		printf("%d %d %d %d %d %d %d %d\n", buff[0], buff[1], buff[2], buff[3], buff[4], buff[5] ,buff[6], buff[7]);
+		//while (temp == 0)
 			send(sockfd, buff, sizeof(buff), 0);
 		
 		/*while ((n = read(sockfd, recvBuff, sizeof(recvBuff)-1))>0){
